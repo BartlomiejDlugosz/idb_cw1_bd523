@@ -21,7 +21,7 @@ ORDER BY name
 ;
 
 -- Q3 returns (name)
-SELECT name
+/*SELECT name
 FROM monarch
 WHERE 0 < (SELECT COUNT(m.coronation)
            FROM monarch AS m
@@ -31,7 +31,14 @@ WHERE 0 < (SELECT COUNT(m.coronation)
            AND m.coronation > (SELECT coronation
                                FROM monarch AS m2
                                WHERE name=monarch.name))
-ORDER BY name
+ORDER BY name*/
+SELECT name
+FROM monarch
+WHERE coronation IS NULL
+AND house IS NOT NULL
+AND 0 < (SELECT COUNT(accession)
+         FROM monarch AS m
+         WHERE m.accession > monarch.accession)
 ;
 
 -- Q4 returns (house,name,accession)
