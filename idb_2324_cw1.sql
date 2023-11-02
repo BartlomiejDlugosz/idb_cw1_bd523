@@ -1,12 +1,12 @@
 -- Q1 returns (name,born_in,father,mother)
 SELECT name,born_in,father,mother
 FROM person
-WHERE born_in IN (SELECT born_in
+WHERE born_in = ALL (SELECT born_in
                  FROM person AS _
-                 WHERE person.father=name)
-AND born_in IN (SELECT born_in
-               FROM person as _
-               WHERE person.mother=name)
+                 WHERE person.father=name
+                 OR person.mother=name)
+AND father IS NOT NULL
+AND mother IS NOT NULL
 ORDER BY name
 ;
 
@@ -31,7 +31,6 @@ WHERE 0 < (SELECT COUNT(m.accession)
            AND m.accession > (SELECT accession
                                FROM monarch AS m2
                                WHERE name=monarch.name))
-
 ORDER BY name
 ;
 
@@ -55,7 +54,7 @@ AND house IS NOT NULL
 
 -- Q7 returns (party,seventeenth,eighteenth,nineteenth,twentieth,twentyfirst)
 
-; 
+;
 
 -- Q8 returns (mother,child,born)
 
@@ -64,7 +63,7 @@ AND house IS NOT NULL
 -- Q9 returns (monarch,prime_minister)
 
 ;
-       
+
 -- Q10 returns (name,entry,period,days)
 
 ;
