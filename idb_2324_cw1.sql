@@ -36,7 +36,13 @@ ORDER BY name
 ;
 
 -- Q4 returns (house,name,accession)
-
+SELECT house, name, accession
+FROM monarch AS m
+WHERE house != ALL (SELECT house
+                    FROM monarch
+                    WHERE m.house=house
+                    AND m.accession > accession)
+AND house IS NOT NULL
 ;
 
 -- Q5 returns (name,role,start_date)
