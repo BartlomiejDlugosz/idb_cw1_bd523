@@ -63,7 +63,7 @@ SELECT first_name,
        count(first_name) AS popularity
 FROM (SELECT CASE
                  WHEN POSITION(' ' IN name) = 0 THEN name
-                 ELSE SUBSTRING(name FROM 1 FOR POSITION(' ' IN name))
+                 ELSE SUBSTRING(name FROM 1 FOR POSITION(' ' IN name) - 1)
                  END AS first_name
       FROM person) AS names
 GROUP BY first_name
