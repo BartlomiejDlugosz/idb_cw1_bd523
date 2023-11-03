@@ -38,18 +38,37 @@ ORDER BY name
 SELECT house, name, accession
 FROM monarch AS m
 WHERE 0 = (SELECT COUNT(house)
-                    FROM monarch
-                    WHERE m.house = house
-                      AND m.accession > accession)
+           FROM monarch
+           WHERE m.house = house
+             AND m.accession > accession)
   AND house IS NOT NULL
 ;
 
 -- Q5 returns (name,role,start_date)
-
+SELECT name, 'Prime Minister' AS role, entry AS start_date
+FROM prime_minister
+UNION ALL
+SELECT name,
+       CASE
+           WHEN house IS NOT NULL THEN 'Monarch'
+           ELSE 'Lord Protector'
+           END   AS role,
+       accession AS start_date
+FROM monarch
+ORDER BY start_date
 ;
 
 -- Q6 returns (first_name,popularity)
-
+SELECT first_name,
+       count(first_name) AS popularity
+FROM (SELECT CASE
+                 WHEN POSITION(' ' IN name) = 0 THEN name
+                 ELSE SUBSTRING(name FROM 1 FOR POSITION(' ' IN name))
+                 END AS first_name
+      FROM person) AS names
+GROUP BY first_name
+HAVING count(first_name) > 1
+ORDER BY popularity DESC, first_name
 ;
 
 -- Q7 returns (party,seventeenth,eighteenth,nineteenth,twentieth,twentyfirst)
