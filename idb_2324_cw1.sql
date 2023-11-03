@@ -72,11 +72,26 @@ ORDER BY popularity DESC, first_name
 ;
 
 -- Q7 returns (party,seventeenth,eighteenth,nineteenth,twentieth,twentyfirst)
-
+SELECT party,
+       COUNT(party) FILTER (WHERE entry >= '1700-01-01' AND entry < '1800-01-01') AS eighteenth,
+       COUNT(party) FILTER (WHERE entry >= '1800-01-01' AND entry < '1900-01-01') AS nineteenth,
+       COUNT(party) FILTER (WHERE entry >= '1900-01-01' AND entry < '2000-01-01') AS twentieth,
+       COUNT(party) FILTER (WHERE entry >= '2000-01-01' AND entry < '2100-01-01') AS twentyfirst
+FROM prime_minister
+GROUP BY party
+ORDER BY party
 ;
 
 -- Q8 returns (mother,child,born)
-
+SELECT woman.name AS mother,
+       child.name AS child,
+       born
+FROM person AS woman
+         LEFT JOIN person AS child ON (woman.name = child.mother)
+         LEFT JOIN (SELECT name, ROW_NUMBER() OVER (PARTITION BY mother ORDER BY dob) AS born
+                    FROM person) AS children ON (child.name = children.name)
+WHERE woman.gender = 'F'
+ORDER BY mother, born, child
 ;
 
 -- Q9 returns (monarch,prime_minister)
