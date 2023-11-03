@@ -55,7 +55,7 @@ SELECT name,
            END   AS role,
        accession AS start_date
 FROM monarch
-ORDER BY start_date
+ORDER BY start_date, name
 ;
 
 -- Q6 returns (first_name,popularity)
