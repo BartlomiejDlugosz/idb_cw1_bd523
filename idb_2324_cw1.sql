@@ -98,9 +98,9 @@ ORDER BY mother, born, child
 SELECT monarch.name AS monarch, p.name AS prime_minister
 FROM monarch
          JOIN person AS m USING (name)
-         JOIN prime_minister AS p ON (p.entry > monarch.accession
+        JOIN prime_minister AS p ON (p.entry > monarch.coronation
     AND (p.entry < m.dod))
-ORDER BY monarch, prime_minister
+ORDER BY monarch, p.name
 ;
 
 -- Q10 returns (name,entry,period,days)
