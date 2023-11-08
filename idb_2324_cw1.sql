@@ -95,11 +95,14 @@ ORDER BY mother, born, child
 ;
 
 -- Q9 returns (monarch,prime_minister)
-SELECT monarch.name AS monarch, p.name AS prime_minister
+SELECT monarch.name AS monarch,
+       p.name       AS prime_minister
 FROM monarch
          JOIN person AS m USING (name)
-        JOIN prime_minister AS p ON (p.entry > monarch.accession
-    AND (p.entry < m.dod))
+         JOIN prime_minister AS p ON (p.entry > monarch.accession
+    AND (p.entry < (SELECT MIN(next_monarch.accession)
+                    FROM monarch AS next_monarch
+                    WHERE next_monarch.accession > monarch.accession)))
 ORDER BY monarch, p.name
 ;
 
