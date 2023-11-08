@@ -95,7 +95,7 @@ ORDER BY mother, born, child
 ;
 
 -- Q9 returns (monarch,prime_minister)
-SELECT monarch.name AS monarch,
+SELECT DISTINCT monarch.name AS monarch,
        p.name AS prime_minister
 FROM monarch
          JOIN person AS m USING (name)
