@@ -95,20 +95,20 @@ ORDER BY mother, born, child
 ;
 
 -- Q9 returns (monarch,prime_minister)
-SELECT DISTINCT monarch.name AS monarch,
-       p.name AS prime_minister
-FROM monarch
-         JOIN person AS m USING (name)
-         JOIN prime_minister AS p ON (p.entry > monarch.accession
-    AND p.entry < COALESCE((SELECT MIN(next_monarch.accession)
-                            FROM monarch AS next_monarch
-                            WHERE next_monarch.accession > monarch.accession), CURRENT_DATE) OR (
-        p.entry < monarch.accession
-        AND
-        monarch.accession < (SELECT MIN(next_pm.entry)
-                             FROM prime_minister AS next_pm
-                             WHERE next_pm.entry > p.entry)
-    ))
+SELECT DISTINCT current_monarch.name AS monarch,
+                pm.name              AS prime_minister
+FROM monarch AS current_monarch
+         JOIN prime_minister AS pm ON (pm.entry > current_monarch.accession
+                                           AND pm.entry < COALESCE((SELECT MIN(next_monarch.accession)
+                                                                    FROM monarch AS next_monarch
+                                                                    WHERE next_monarch.accession > current_monarch.accession),
+                                                                   CURRENT_DATE)
+    OR (
+                                                   pm.entry < current_monarch.accession
+                                               AND current_monarch.accession < (SELECT MIN(next_pm.entry)
+                                                                                FROM prime_minister AS next_pm
+                                                                                WHERE next_pm.entry > pm.entry)
+                                           ))
 ORDER BY monarch, prime_minister
 ;
 
