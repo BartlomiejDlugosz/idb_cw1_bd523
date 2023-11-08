@@ -109,7 +109,7 @@ FROM monarch
                              FROM prime_minister AS next_pm
                              WHERE next_pm.entry > p.entry)
     ))
-ORDER BY monarch, p.name
+ORDER BY prime_minister, monarch
 ;
 
 -- Q10 returns (name,entry,period,days)
