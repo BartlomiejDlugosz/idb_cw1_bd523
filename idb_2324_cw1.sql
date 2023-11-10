@@ -24,23 +24,21 @@ ORDER BY name
 
 -- Q3 returns (name)
 SELECT name
-FROM monarch
-         LEFT JOIN person
-                   USING (name)
-WHERE 0 < (SELECT COUNT(m.accession)
-           FROM monarch AS m
-           WHERE m.accession < person.dod
-             AND m.accession > monarch.accession)
+FROM monarch AS currentMonarch
+         NATURAL JOIN person
+WHERE dod > (SELECT MIN(accession)
+             FROM monarch AS nextMonarch
+             WHERE accession > currentMonarch.accession)
 ORDER BY name
 ;
 
 -- Q4 returns (house,name,accession)
 SELECT house, name, accession
-FROM monarch AS m
+FROM monarch AS currentMonarch
 WHERE 0 = (SELECT COUNT(house)
            FROM monarch
-           WHERE m.house = house
-             AND m.accession > accession)
+           WHERE currentMonarch.house = house
+             AND currentMonarch.accession > accession)
   AND house IS NOT NULL
 ;
 
@@ -88,7 +86,8 @@ SELECT woman.name AS mother,
        born
 FROM person AS woman
          LEFT JOIN person AS child ON (woman.name = child.mother)
-         LEFT JOIN (SELECT name, ROW_NUMBER() OVER (PARTITION BY mother ORDER BY dob) AS born
+         LEFT JOIN (SELECT name,
+                           ROW_NUMBER() OVER (PARTITION BY mother ORDER BY dob) AS born
                     FROM person) AS children ON (child.name = children.name)
 WHERE woman.gender = 'F'
 ORDER BY mother, born, child
@@ -113,6 +112,13 @@ ORDER BY monarch, prime_minister
 ;
 
 -- Q10 returns (name,entry,period,days)
-
+SELECT name,
+       entry,
+       ROW_NUMBER() OVER (PARTITION BY name ORDER BY entry) AS period,
+       (SELECT MIN(entry)
+        FROM prime_minister
+        WHERE entry > currentPm.entry) - entry AS days
+FROM prime_minister AS currentPm
+ORDER BY days
 ;
 
