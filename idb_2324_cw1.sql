@@ -115,9 +115,9 @@ ORDER BY monarch, prime_minister
 SELECT name,
        entry,
        ROW_NUMBER() OVER (PARTITION BY name ORDER BY entry) AS period,
-       (SELECT MIN(entry)
+       COALESCE((SELECT MIN(entry)
         FROM prime_minister
-        WHERE entry > currentPm.entry) - entry AS days
+        WHERE entry > currentPm.entry), CURRENT_DATE) - entry AS days
 FROM prime_minister AS currentPm
 ORDER BY days
 ;
