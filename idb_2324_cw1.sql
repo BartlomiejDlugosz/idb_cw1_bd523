@@ -58,14 +58,14 @@ ORDER BY start_date, name
 
 -- Q6 returns (first_name,popularity)
 SELECT first_name,
-       count(first_name) AS popularity
+       COUNT(first_name) AS popularity
 FROM (SELECT CASE
                  WHEN POSITION(' ' IN name) = 0 THEN name
                  ELSE SUBSTRING(name FROM 1 FOR POSITION(' ' IN name) - 1)
                  END AS first_name
       FROM person) AS names
 GROUP BY first_name
-HAVING count(first_name) > 1
+HAVING COUNT(first_name) > 1
 ORDER BY popularity DESC, first_name
 ;
 
@@ -83,12 +83,13 @@ ORDER BY party
 -- Q8 returns (mother,child,born)
 SELECT woman.name AS mother,
        child.name AS child,
-       born
+       CASE
+           WHEN child.name IS NOT NULL
+               THEN ROW_NUMBER() OVER (PARTITION BY child.mother ORDER BY child.dob)
+           ELSE null
+           END    AS born
 FROM person AS woman
          LEFT JOIN person AS child ON (woman.name = child.mother)
-         LEFT JOIN (SELECT name,
-                           ROW_NUMBER() OVER (PARTITION BY mother ORDER BY dob) AS born
-                    FROM person) AS children ON (child.name = children.name)
 WHERE woman.gender = 'F'
 ORDER BY mother, born, child
 ;
@@ -104,9 +105,9 @@ FROM monarch AS current_monarch
                                                                    CURRENT_DATE)
     OR (
                                                    pm.entry < current_monarch.accession
-                                               AND current_monarch.accession < (SELECT MIN(next_pm.entry)
+                                               AND current_monarch.accession < COALESCE((SELECT MIN(next_pm.entry)
                                                                                 FROM prime_minister AS next_pm
-                                                                                WHERE next_pm.entry > pm.entry)
+                                                                                WHERE next_pm.entry > pm.entry), CURRENT_DATE)
                                            ))
 ORDER BY monarch, prime_minister
 ;
