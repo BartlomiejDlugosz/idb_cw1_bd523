@@ -1,6 +1,6 @@
 -- Q1 returns (name,born_in,father,mother)
 SELECT p.name, p.born_in, p.father, p.mother
-FROM person p
+FROM person AS p
          LEFT JOIN person AS father
                    ON (p.father = father.name)
          LEFT JOIN person AS mother
@@ -14,11 +14,11 @@ ORDER BY name
 SELECT name
 FROM person
 EXCEPT
-(SELECT m.name
- FROM monarch AS m
+(SELECT name
+ FROM monarch
  UNION
- SELECT p.name
- FROM prime_minister AS p)
+ SELECT name
+ FROM prime_minister)
 ORDER BY name
 ;
 
@@ -26,9 +26,9 @@ ORDER BY name
 SELECT name
 FROM monarch AS currentMonarch
          NATURAL JOIN person
-WHERE dod > (SELECT MIN(accession)
-             FROM monarch AS nextMonarch
-             WHERE accession > currentMonarch.accession)
+WHERE dod > COALESCE((SELECT MIN(accession)
+                      FROM monarch AS nextMonarch
+                      WHERE accession > currentMonarch.accession), CURRENT_DATE)
 ORDER BY name
 ;
 
@@ -45,7 +45,7 @@ WHERE 0 = (SELECT COUNT(house)
 -- Q5 returns (name,role,start_date)
 SELECT name, 'Prime Minister' AS role, entry AS start_date
 FROM prime_minister
-UNION ALL
+UNION
 SELECT name,
        CASE
            WHEN house IS NOT NULL THEN 'Monarch'
@@ -84,9 +84,8 @@ ORDER BY party
 SELECT woman.name AS mother,
        child.name AS child,
        CASE
-           WHEN child.name IS NOT NULL
+           WHEN child IS NOT NULL
                THEN ROW_NUMBER() OVER (PARTITION BY child.mother ORDER BY child.dob)
-           ELSE null
            END    AS born
 FROM person AS woman
          LEFT JOIN person AS child ON (woman.name = child.mother)
@@ -102,12 +101,13 @@ FROM monarch AS current_monarch
                                            AND pm.entry < COALESCE((SELECT MIN(next_monarch.accession)
                                                                     FROM monarch AS next_monarch
                                                                     WHERE next_monarch.accession > current_monarch.accession),
-                                                                   CURRENT_DATE)
-    OR (
+                                                                   CURRENT_DATE
+                                                          ) OR (
                                                    pm.entry < current_monarch.accession
                                                AND current_monarch.accession < COALESCE((SELECT MIN(next_pm.entry)
-                                                                                FROM prime_minister AS next_pm
-                                                                                WHERE next_pm.entry > pm.entry), CURRENT_DATE)
+                                                                                         FROM prime_minister AS next_pm
+                                                                                         WHERE next_pm.entry > pm.entry),
+                                                                                        CURRENT_DATE)
                                            ))
 ORDER BY monarch, prime_minister
 ;
@@ -115,10 +115,10 @@ ORDER BY monarch, prime_minister
 -- Q10 returns (name,entry,period,days)
 SELECT name,
        entry,
-       ROW_NUMBER() OVER (PARTITION BY name ORDER BY entry) AS period,
+       ROW_NUMBER() OVER (PARTITION BY name ORDER BY entry)            AS period,
        COALESCE((SELECT MIN(entry)
-        FROM prime_minister
-        WHERE entry > currentPm.entry), CURRENT_DATE) - entry AS days
+                 FROM prime_minister
+                 WHERE entry > currentPm.entry), CURRENT_DATE) - entry AS days
 FROM prime_minister AS currentPm
 ORDER BY days
 ;
