@@ -82,13 +82,13 @@ ORDER BY party
 
 -- Q8 returns (mother,child,born)
 SELECT woman.name AS mother,
-       child.name AS child,
+       children.name AS child,
        CASE
-           WHEN child IS NOT NULL
-               THEN ROW_NUMBER() OVER (PARTITION BY child.mother ORDER BY child.dob)
+           WHEN children.name IS NOT NULL
+               THEN ROW_NUMBER() OVER (PARTITION BY children.mother ORDER BY children.dob)
            END    AS born
 FROM person AS woman
-         LEFT JOIN person AS child ON (woman.name = child.mother)
+         LEFT JOIN person AS children ON (woman.name = children.mother)
 WHERE woman.gender = 'F'
 ORDER BY mother, born, child
 ;
